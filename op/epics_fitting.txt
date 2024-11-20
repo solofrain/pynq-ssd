@@ -1,0 +1,33 @@
+To do trim dac fitting using epics:
+
+Use Till's Scilab interface:
+exec('/usr/local/epics/extensions/src/labca_1_5_beta/bin/linux-x86/labca.sce')
+
+Fitting functions are:
+
+function y = peval(x, p)
+//basic erf() function for calculating fitted curves
+global ud
+        y = p(1)*(1+erf(p(3)*ud*(p(2)-x)))+p(4)
+endfunction
+
+function res = resids(p,z)
+//provides residuals between measured and calculated values
+global ud
+        x=z(1); y=z(2)
+         res = y-(p(1)*(1+erf(p(3)*ud*(p(2)-x)))+p(4))
+endfunction
+
+
+
+function center = fit(x,y_meas,p0)
+//Fits one set of intensities from threshold scan. ud is 1 for lower threshold scan,
+//-1 for upper threshold scan. Returns intensity, centroid and width of best fit to
+//erf() function. x is array of DAC values for intensities y_meas.
+//p0[0...3] is initial guess for solution.
+global ud
+        Z=[x;y_meas]
+        [plsq,er] = datafit(resids,Z,p0)
+        print plsq
+        center = plsq(2)
+endfunction

@@ -1,0 +1,8 @@
+The PyCute shell running Python 2.3.5 (#2, Feb  9 2005, 00:38:15) 
+[GCC 3.3.5 (Debian 1:3.3.5-8)] on linux2.
+Type "copyright", "credits" or "license" for more information on Python.
+>>> execfile('-demo')
+Traceback (most recent call last):
+  File "<input>", line 1, in ?
+IOError: [Errno 2] No such file or directory: '-demo'
+>>> 

@@ -1,0 +1,30 @@
+include "zDDMRecord.dbd"
+include "menuConvert.dbd"
+#include "bptTherm10kdegC_Maia.dbd"
+include "bptTherm10kdegC.dbd"
+
+registrar(registerzDDMConfig)
+registrar(registerAoI2CConfig)
+registrar(registerAiI2CConfig)
+#registrar(registerSPIConfig)
+#registrar(registerSPI2Config)
+registrar(registerZTMPConfig)
+registrar(registerpstate)
+registrar(registerpeek)
+registrar(registerpoke)
+registrar(iocshSystemCommand)
+
+variable("devI2CDebug",int)
+#variable("devSPIDebug",int)
+#variable("devSPI2Debug",int)
+variable("devZTMPDebug",int)
+variable("devzDDMdebug",int)
+variable("zDDMRecordDebug",int)
+
+
+device(ao,VME_IO,devAoI2C,"I2C D-A Converter")
+device(ai,VME_IO,devAiI2C,"I2C A-D Converter")
+#device(ao,VME_IO,devAoSPI,"SPI D-A Converter")
+#device(ai,VME_IO,devAiSPI2,"SPI2 A-D Converter")
+device(ai,INST_IO,devAiZTMP,"ZTMP A-D Converter")
+device(zDDM,VME_IO,devzDDM,"NSLS detector")

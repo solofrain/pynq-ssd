@@ -1,0 +1,2 @@
+#!/bin/sh
+medm -x -displayFont scalable spi_dacs2.adl &

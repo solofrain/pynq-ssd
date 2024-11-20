@@ -1,0 +1,7 @@
+# Example substitutions file
+
+file "db/i2cDacs.db" {
+    { Sys = "peter" }
+    { Dev = "dac" }
+}
+

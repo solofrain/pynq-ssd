@@ -1,0 +1,99 @@
+record(ao, "det1:VL0") {
+  field(DESC, "VL0")
+  field(DTYP, "I2C D-A Converter")
+  field(OUT,"#C2 S0 @12, 0") 
+  field(LINR,"LINEAR")
+  field(EGUF,"500.0")
+  field(EGUL,"0.0")
+  field(HOPR,"500.0")
+  field(LOPR,"0.0")
+  field(PREC,"3")
+  field(EGU,"Volts")
+}
+
+record(ao, "det1:VL1") {
+  field(DESC, "VL1")
+  field(DTYP, "I2C D-A Converter")
+  field(OUT,"#C2 S1 @12, 0")
+  field(LINR,"LINEAR")
+  field(EGUF,"5.0")
+  field(EGUL,"0.0")
+  field(HOPR,"5.0")
+  field(LOPR,"0.0")
+  field(PREC,"3")
+  field(EGU,"Volts")
+}
+record(ao, "det1:VH1") {
+  field(DESC, "VH1")
+  field(DTYP, "I2C D-A Converter")
+  field(OUT,"#C2 S2 @12, 0")
+  field(LINR,"LINEAR")
+  field(EGUF,"5.0")
+  field(EGUL,"0.0")
+  field(HOPR,"5.0")
+  field(LOPR,"0.0")
+  field(PREC,"3")
+  field(EGU,"Volts")
+}
+record(ao, "det1:VL2") {
+  field(DESC, "VL2")
+  field(DTYP, "I2C D-A Converter")
+  field(OUT,"#C2 S3 @12, 0")
+  field(LINR,"LINEAR")
+  field(EGUF,"5.0")
+  field(EGUL,"0.0")
+  field(HOPR,"5.0")
+  field(LOPR,"0.0")
+  field(PREC,"3")
+  field(EGU,"Volts")
+}
+record(ao, "det1:VH2") {
+  field(DESC, "VH2")
+  field(DTYP, "I2C D-A Converter")
+  field(OUT,"#C2 S4 @12, 0") 
+  field(LINR,"LINEAR")
+  field(EGUF,"5.0")
+  field(EGUL,"0.0")
+  field(HOPR,"5.0")
+  field(LOPR,"0.0")
+  field(PREC,"3")
+  field(EGU,"Volts")
+}
+
+record(ao, "det1:HV") {
+  field(DESC, "HV")
+  field(DTYP, "I2C D-A Converter")
+  field(OUT,"#C2 S5 @12, 0")
+  field(LINR,"LINEAR")
+  field(EGUF,"200.0")
+  field(EGUL,"0.0")
+  field(HOPR,"150.0")
+  field(LOPR,"0.0")
+  field(PREC,"3")
+  field(EGU,"Volts")
+}
+record(ao, "det1.P1") {
+  field(DESC, "Peltier 1")
+  field(DTYP, "I2C D-A Converter")
+  field(OUT,"#C2 S6 @12, 0")
+  field(LINR,"LINEAR")
+  field(EGUF,"5.0")
+  field(EGUL,"0.0")
+  field(HOPR,"5.0")
+  field(LOPR,"0.0")
+  field(PREC,"3")
+  field(EGU,"Volts")
+}
+record(ao, "det1:P2") {
+  field(DESC, "Peltier 2")
+  field(DTYP, "I2C D-A Converter")
+  field(OUT,"#C2 S7 @12, 0")
+  field(LINR,"LINEAR")
+  field(EGUF,"5.0")
+  field(EGUL,"0.0")
+  field(HOPR,"5.0")
+  field(LOPR,"0.0")
+  field(PREC,"3")
+  field(EGU,"Volts")
+}
+

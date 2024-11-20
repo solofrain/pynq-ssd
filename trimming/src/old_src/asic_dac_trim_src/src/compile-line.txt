@@ -1,0 +1,18 @@
+#!/bin/bash
+
+export PACKAGE_CFLAGS= -DHAVE_CONFIG_H -I. -I. -I.. -DPACKAGE_DATA_DIR=\""/usr/local/share"\"     -DPACKAGE_LOCALE_DIR=\""/usr/local/share/locale"\"       -I/usr/include/gtk-2.0 -I/usr/lib/gtk-2.0/include -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -g -O2 -I/usr/local/epics/base/include -I/usr/local/epics/base/include/os/Linux -I/usr/local/epics/extensions/include
+
+export PACKAGE_LIBS= -lezca -lgrace_np -lminpack -L/usr/local/epics/extensions/lib/linux-x86 -lc
+
+gcc-3.4 -c main.c $PACKAGE_CFLAGS 
+gcc-3.4 -c support.c $PACKAGE_CFLAGS 
+gcc-3.4 -c interface.c $PACKAGE_CFLAGS 
+gcc-3.4 -c callbacks.c $PACKAGE_CFLAGS 
+g77 -c testfit.c $PACKAGE_CFLAGS 
+g77 -c readit.c $PACKAGE_CFLAGS
+
+g77 -o thresh_setup main.o support.o interface.o testfit.o callbacks.o $PACKAGE_LIBS
+
+g77 -o thresh_simul main.o support.o interface.o readit.o callbacks.o $PACKAGE_LIBS
+
+cp thresh* ~/cfMemMap_new/op

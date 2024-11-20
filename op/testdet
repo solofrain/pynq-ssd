@@ -1,0 +1,11 @@
+./newdet
+caput det1.EBLK 1
+./test_on
+sh adc_stop.sh
+caput det1.GLDACEN 1
+caput det1.VL0 0.36
+caput det1.VL1 0.36
+caput det1.VL2 0.36
+caput det1.VH1 3
+caput det1.VH2 3
+

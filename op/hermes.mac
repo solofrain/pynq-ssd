@@ -1,0 +1,87 @@
+long array si_dat[3][384]
+long array si_val[3]
+global si_dat
+global si_val
+
+# Flags to turn on and off use of Hermes detector. 
+# HERMES is a global flag. Nothing happens if it is zero.
+# ENABLEA, ENABLEB, ENABLEC turn on or off the saving of one of the three
+# counters on each channel. A is the threshold, B and C are the SCA counters.
+# THe simplest possible configuration has HERMES=1 and ENABLEA=1. THe default
+# has all =1.
+
+# Spec Counters 4, 5 and 6 are the integral of all the counts A B and C above.
+# For alignment purposes, counter 11 is defined as the sum of the central 8 channels. 
+#  Thus, scanning some feature using that as the signal will allow it to be centered.
+
+global HERMES
+global ENABLEA
+global ENABLEB
+global ENABLEC
+
+HERMES=1
+ENABLEA=1
+ENABLEB=1
+ENABLEC=1
+
+def user_getcounts '
+# Read all three chips counters into si_dat array.
+# Put integrated counts into Spec counter variables.
+# Put central 8 channels of si_dat[0] into Spec variable.
+   if(HERMES==1){
+	global si_dat
+	global si_val
+	si_dat[0][:]=epics_get("det1.S1")
+	si_dat[1][:]=epics_get("det1.S2")
+	si_dat[2][:]=epics_get("det1.S3")
+	si_val=epics_get("det1.VAL")
+	S[17]=si_val[0]
+	S[18]=si_val[1]
+	S[19]=si_val[2]
+#	S[14]= si_dat[0][188]+si_dat[0][189]+si_dat[0][190]+si_dat[0][191]+si_dat[0][192]+si_dat[0][193]+si_dat[0][194]+si_dat[0][195]+si_dat[0][196]
+	}
+'
+def user_precount '
+# start detector acquisition
+  if(HERMES==1){
+	epics_put("det1.TP",COUNT_TIME)
+	epics_put("det1.CNT",1)
+	}
+'
+def user_postcount '
+# wait for acquisition to complete.
+#	print "Done. ",
+   if(HERMES==1){
+	while(epics_get("det1.CNT")=="Count"){}
+	}
+'
+	
+def user_scan_loop '
+
+  if(HERMES==1){
+	local i
+	on(DATAFILE);offt
+	if(ENABLEA==1){
+	  printf("\n@A ")
+	  for(i=0;i<=383;i++){
+		  printf("%i ",si_dat[0][i+32])
+		  }
+		}
+	if(ENABLEB==1){	
+	  printf("\n@B ")
+	  for(i=0;i<=383;i++){
+		printf("%i ",si_dat[1][i])
+		}
+	}
+	if(ENABLEC==1){
+	  printf("\n@C ")
+	  for(i=0;i<=383;i++){
+		printf("%i ",si_dat[2][i])
+		}
+	 }
+	  printf("\n")
+	  ont; off(DATAFILE)
+	}
+'
+	
+	

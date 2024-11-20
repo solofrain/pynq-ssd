@@ -1,0 +1,17 @@
+How do these registers look?
+
+Register 0x10:
+bit 0: token data (connects to first hermes CS)
+bit 1: token clock
+
+Register 0x14:
+bit 0 : spi data
+bit 1 : spi clock
+
+Register 0x1C:
+bit 0:  en
+bit 1: wr
+bit 2: sdac
+
+Register 0x20
+bit 0 : sdo    (after toggling spi clock, read this register which is directly connected to hermes sdo)

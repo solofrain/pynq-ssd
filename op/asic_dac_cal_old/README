@@ -1,0 +1,12 @@
+Program: asic_dac_cal
+
+Performs automatic scanning of window thresholds to measure the on-chip 6-bit
+DAC slopes. The program assumes the presence of a single spectral peak in the
+incident x-ray beam, or at least an Alpha-Beta doublet from a pure K-edge
+fluorescence. It generates a file 'factors.dat', in the current directory. This
+file will contain a measured slope for each DAC, since there is significant
+dispersion in them. It works by setting all DACs to 5 values across their range,
+and scanning the thresholds through the photopeak. The resulting erf()-shaped
+curves are fit, and the set of fitted centroids fit again to a straight line.
+The slope of this line is stored in the factors.dat file. The program is a Glade application, intended to be launched
+from the 'detector' MEDM screen.

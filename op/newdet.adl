@@ -1,0 +1,269 @@
+
+file {
+	name="/home/peter/IOCs/hermes3_detector/op/newdet.adl"
+	version=030102
+}
+display {
+	object {
+		x=55
+		y=173
+		width=616
+		height=369
+	}
+	clr=14
+	bclr=4
+	cmap=""
+	gridSpacing=5
+	gridOn=0
+	snapToGrid=0
+}
+"color map" {
+	ncolors=65
+	colors {
+		ffffff,
+		ececec,
+		dadada,
+		c8c8c8,
+		bbbbbb,
+		aeaeae,
+		9e9e9e,
+		919191,
+		858585,
+		787878,
+		696969,
+		5a5a5a,
+		464646,
+		2d2d2d,
+		000000,
+		00d800,
+		1ebb00,
+		339900,
+		2d7f00,
+		216c00,
+		fd0000,
+		de1309,
+		be190b,
+		a01207,
+		820400,
+		5893ff,
+		597ee1,
+		4b6ec7,
+		3a5eab,
+		27548d,
+		fbf34a,
+		f9da3c,
+		eeb62b,
+		e19015,
+		cd6100,
+		ffb0ff,
+		d67fe2,
+		ae4ebc,
+		8b1a96,
+		610a75,
+		a4aaff,
+		8793e2,
+		6a73c1,
+		4d52a4,
+		343386,
+		c7bb6d,
+		b79d5c,
+		a47e3c,
+		7d5627,
+		58340f,
+		99ffff,
+		73dfff,
+		4ea5f9,
+		2a63e4,
+		0a00b8,
+		ebf1b5,
+		d4db9d,
+		bbc187,
+		a6a462,
+		8b8239,
+		73ff6b,
+		52da3b,
+		3cb420,
+		289315,
+		1a7309,
+	}
+}
+"cartesian plot" {
+	object {
+		x=26
+		y=14
+		width=450
+		height=295
+	}
+	plotcom {
+		clr=14
+		bclr=0
+	}
+	trace[0] {
+		ydata="det1.S1"
+		data_clr=14
+	}
+	trace[1] {
+		ydata="det1.S2"
+		data_clr=20
+	}
+	trace[2] {
+		ydata="det1.S3"
+		data_clr=52
+	}
+}
+composite {
+	object {
+		x=214
+		y=318
+		width=178
+		height=50
+	}
+	"composite name"=""
+	children {
+		"choice button" {
+			object {
+				x=294
+				y=323
+				width=98
+				height=41
+			}
+			control {
+				chan="det1.CONT"
+				clr=14
+				bclr=5
+			}
+		}
+		"message button" {
+			object {
+				x=219
+				y=323
+				width=65
+				height=42
+			}
+			control {
+				chan="det1.CNT"
+				clr=14
+				bclr=5
+			}
+			label="CNT"
+			press_msg="1"
+			clrmod="discrete"
+		}
+		rectangle {
+			object {
+				x=214
+				y=318
+				width=75
+				height=50
+			}
+			"basic attribute" {
+				clr=20
+			}
+			"dynamic attribute" {
+				clr="discrete"
+				vis="if not zero"
+				calc="A"
+				chan="det1.CNT"
+			}
+		}
+	}
+}
+text {
+	object {
+		x=235
+		y=171
+		width=148
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Shaping time"
+}
+"shell command" {
+	object {
+		x=532
+		y=106
+		width=40
+		height=40
+	}
+	command[0] {
+		label="Thresh. Trim"
+		name="./asic_dac_trim &"
+	}
+	command[1] {
+		label="Enable test pulse"
+		name="./test_on"
+	}
+	command[2] {
+		label="Disable test pulse"
+		name="./test_off"
+	}
+	command[3] {
+		label="ADC scan"
+		name="./adc_scan"
+	}
+	command[4] {
+		label="ADC stop"
+		name="./adc_stop"
+	}
+	clr=14
+	bclr=5
+	label="Utils"
+}
+"related display" {
+	object {
+		x=503
+		y=188
+		width=100
+		height=120
+	}
+	display[0] {
+		label="Thresholds"
+		name="on-chip_dacs.adl"
+	}
+	display[1] {
+		label="Peltier & Bias"
+		name="spi_dacs2.adl"
+	}
+	display[2] {
+		label="Trims"
+		name="trims.adl"
+	}
+	display[3] {
+		label="DAC params"
+		name="params.adl"
+	}
+	display[4] {
+		label="Temps"
+		name="temps.adl"
+	}
+	display[5] {
+		label="Setup"
+		name="setup.adl"
+	}
+	clr=14
+	bclr=5
+	visual="a column of buttons"
+}
+text {
+	object {
+		x=499
+		y=35
+		width=93
+		height=49
+	}
+	"basic attribute" {
+		clr=20
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A>-10||B>-10||C>10||D>10"
+		chan="det1:ai0"
+		chanB="det1:ai1"
+		chanC="det1:ai2"
+		chanD="det1:ai3"
+	}
+	textix="Hot!"
+	align="horiz. centered"
+}

@@ -1,0 +1,41 @@
+1	Vdd   
+2	Vss   
+3	CS	Chip select    
+4	SDI   	SPI data In
+5	SCK   	SPI Clock
+6	TCK   	Token Clock
+7	WR    	Write/Read. 1=read, 0=write
+8	EN    	Count Enable
+9	SDAC  	On-chip DAC program when 1
+10	RST   	Global reset
+11	Vddd  
+12	ssd   
+13	Vdd   
+14	Vss   
+15	VH2  	Scaler2 window discriminator High 
+16	VL2  	Scaler2 window discriminator Low
+17	VH1   	Scaler1 window discriminator High
+18	VL1   	Scaler1 window discriminator High
+19	VL0   	Scaler0 threshold discriminator
+20	BDAC  	On-Chip DAC range control
+21	BLN   	Output baseline control
+22	BLK   	Input leakage current control
+23	OAN   	Analog pulse output
+24	OLK   	Pixel leakage current monitor
+25	Vss   
+26	Vdd   
+27	CAL   	Test pulse input
+28	Vsubd 
+29	SDO   	SPI Data Out
+30	TO    	Token out
+31	E4T   	N/A
+32	Vddd  
+33	Vssd  
+34	Vss   
+35	Vdd
+
+11 digital control signals. 1 SPI data port. Token passing for multiple chip 
+installations.
+
+We will not implement BDAC, BLN or BLK. We'll only use the off-chip DACs 
+(5 channels).

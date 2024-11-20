@@ -1,0 +1,99 @@
+record(ao, "$(user):ao0") {
+  field(DESC, "E4 test")
+  field(DTYP, "SPI D-A Converter")
+  field(OUT,"#C1 S0 @16, 0") 
+  field(LINR,"LINEAR")
+  field(EGUF,"3.0")
+  field(EGUL,"0.0")
+  field(HOPR,"3.0")
+  field(LOPR,"0.0")
+  field(PREC,"3")
+  field(EGU,"Volts")
+}
+
+record(ao, "$(user):ao1") {
+  field(DESC, "E5 test")
+  field(DTYP, "SPI D-A Converter")
+  field(OUT,"#C1 S1 @16, 0")
+  field(LINR,"LINEAR")
+  field(EGUF,"3.0")
+  field(EGUL,"0.0")
+  field(HOPR,"3.0")
+  field(LOPR,"0.0")
+  field(PREC,"3")
+  field(EGU,"Volts")
+}
+record(ao, "$(user):ao2") {
+  field(DESC, "E6 test")
+  field(DTYP, "SPI D-A Converter")
+  field(OUT,"#C1 S2 @16, 0")
+  field(LINR,"LINEAR")
+  field(EGUF,"3.0")
+  field(EGUL,"0.0")
+  field(HOPR,"3.0")
+  field(LOPR,"0.0")
+  field(PREC,"3")
+  field(EGU,"Volts")
+}
+record(ao, "$(user):ao3") {
+  field(DESC, "E7 test")
+  field(DTYP, "SPI D-A Converter")
+  field(OUT,"#C1 S3 @16, 0")
+  field(LINR,"LINEAR")
+  field(EGUF,"3.0")
+  field(EGUL,"0.0")
+  field(HOPR,"3.0")
+  field(LOPR,"0.0")
+  field(PREC,"3")
+  field(EGU,"Volts")
+}
+record(ao, "$(user):ao4") {
+  field(DESC, "Offset PD")
+  field(DTYP, "SPI D-A Converter")
+  field(OUT,"#C1 S4 @16, 0")
+  field(LINR,"LINEAR")
+  field(EGUF,"3.0")
+  field(EGUL,"0.0")
+  field(HOPR,"3.0")
+  field(LOPR,"0.0")
+  field(PREC,"3")
+  field(EGU,"Volts")
+}
+record(ao, "$(user):ao5") {
+  field(DESC, "Guard bias")
+  field(DTYP, "SPI D-A Converter")
+  field(OUT,"#C1 S5 @16, 0")
+  field(LINR,"LINEAR")
+  field(EGUF,"3.0")
+  field(EGUL,"0.0")
+  field(HOPR,"3.0")
+  field(LOPR,"0.0")
+  field(PREC,"3")
+  field(EGU,"Volts")
+}
+record(ao, "$(user):ao6") {
+  field(DESC, "Offset TD")
+  field(DTYP, "SPI D-A Converter")
+  field(OUT,"#C1 S6 @16, 0")
+  field(LINR,"LINEAR")
+  field(EGUF,"3.0")
+  field(EGUL,"0.0")
+  field(HOPR,"3.0")
+  field(LOPR,"0.0")
+  field(PREC,"3")
+  field(EGU,"Volts")
+}
+record(ao, "$(user):ao7") {
+  field(DESC, "Cal-DAC")
+  field(DTYP, "SPI D-A Converter")
+  field(OUT,"#C1 S7 @16, 0")
+  field(LINR,"LINEAR")
+  field(EGUF,"3.0")
+  field(EGUL,"0.0")
+  field(HOPR,"3.0")
+  field(LOPR,"0.0")
+  field(PREC,"3")
+  field(EGU,"Volts")
+}
+
+

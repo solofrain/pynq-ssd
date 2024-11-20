@@ -1,0 +1,4 @@
+NAME=new_hermes_IOC
+PORT=5000
+USER=root
+HOST=pynq

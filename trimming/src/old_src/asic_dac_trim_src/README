@@ -1,0 +1,13 @@
+Program: asic_dac_trim
+
+Performs automatic scanning of window thresholds to measure the on-chip
+comparator offsets and correct them using the on-chip 6-bit DACs. THe program
+assumes the presence of a single spectral peak in the incident x-ray beam, or at
+least an Alpha-Beta doublet from a pure K-edge fluorescence. It also expects a
+file 'factors.dat', to be present in the current directory. THis file should
+contain a previously-calibrated slope for each DAC, since there is significant
+dispersion in them. If this file is missing, a fixed constant value is assumed,
+taken as the average of a previous calibration set. The resulting corrections
+are much better than nothing, but not as good as they could be if the file
+existed. The program is a Glade application, intended to be launched from the
+'detector' MEDM screen.

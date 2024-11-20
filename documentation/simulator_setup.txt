@@ -1,0 +1,30 @@
+> start the maia_zserver (in the maia directory)
+
+> from a seperate ssh session
+  In the utils directory
+    ./regpeekpoke W 104 [26] 3   // puts the fifo into test mode (will send a counter value)
+
+
+    ./regpeekpoke W 40 [10] 1    //puts into simulation mode
+   
+
+    The default event rate is 1Hz.
+
+     To change the simulated event rate
+     > ./regpeekpoke W 44 [11] value    // where event rate = 50M / val   (eg  val = 50M => 
+1Hz)
+
+
+Attached is the new firmware with the added frame logic (version 82).   I've added the register addresses below.   One of the front panel LED's illuminates when frame is active.
+
+To test:
+> ./regpeekpoke W 212 [53] 25000000   -- sets frame length to 1 sec
+> ./regpeekpoke W 208 [52] 1  - soft triggers a frame to start   (led comes on, events available)
+
+> ./regpeekpoke R 208 [52] -- reads 1 if frame is active, 0 is frame is complete
+> ./regpeekpoke R 216 [54]   -- reads current frame number (increments after frame is complete)
+
+
+To tell it just to run forever without frames
+>  ./regpeekpoke W 220 [55] 1
+

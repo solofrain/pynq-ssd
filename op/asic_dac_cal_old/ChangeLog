@@ -1,0 +1,2 @@
+01/10/06 Added EPICS includes and libraries to src/Makefile.am. Also added
+xmgrace includes and libraries.

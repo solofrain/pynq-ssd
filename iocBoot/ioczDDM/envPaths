@@ -1,0 +1,3 @@
+epicsEnvSet("IOC","ioczDDM")
+epicsEnvSet("TOP","/epics/iocs/new_hermes_IOC")
+epicsEnvSet("EPICS_BASE","/epics/base")

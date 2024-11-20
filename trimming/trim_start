@@ -1,0 +1,5 @@
+export LD_LIBRARY_PATH=/home/peter/epics/base/lib/linux-x86_64:/home/peter/epics/extensions/lib/linux-x86_64
+export PATH=$PATH:/home/peter/epics/base/bin/linux-x86_64:/home/peter/epics/extensions/bin/linux-x86_64
+
+./trimming &
+

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+FILES=("/epics/iocs/new_hermes_IOC/zDDMApp/src/devzDDM.c" "/epics/iocs/new_hermes_IOC/zDDMApp/src/zDDMRecord.c" "/epics/iocs/new_hermes_IOC/zDDMApp/src/log.h")
+
+while true; do
+    inotifywait -e modify "${FILES[@]}"
+
+    make
+
+    build_date=$(date)
+    echo "Last built $build_date"
+
+done

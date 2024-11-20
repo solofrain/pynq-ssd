@@ -1,0 +1,28 @@
+record(waveform,"det1:enspect")
+{
+        field(DESC, "Energy spectra")
+        field(INP,"det1.MCA CP NMS")
+	field(NELM, "1572864")
+	field(XDIM, "4096")
+	field(YDIM, "384")
+	field(FTVL, "LONG")
+        field(EGU,"Counts")
+}
+record(waveform,"det1:tspect")
+{
+        field(DESC, "Time spectra")
+        field(INP,"det1.TDC CP NMS")
+	field(NELM, "393216")
+	field(XDIM, "1024")
+	field(YDIM, "384")
+	field(FTVL, "LONG")
+        field(EGU,"Counts")
+}
+record(waveform,"det1:single")
+{
+        field(DESC, "Single spectrum")
+        field(INP,"det1.SPECT CP NMS")
+	field(NELM, "4096")
+	field(FTVL, "LONG")
+        field(EGU,"Counts")
+}
