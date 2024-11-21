@@ -49,3 +49,4 @@ iocInit
 #
 ## Start any sequence programs
 #seq sncExample, "user=peter"
+

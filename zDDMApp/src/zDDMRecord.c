@@ -71,12 +71,21 @@ extern epicsTimerQueueId  zDDMWdTimerQ;
 #define zDDM_STATE_WAITING 1
 #define zDDM_STATE_COUNTING 2
 
+const char* zDDM_STATE[] = { "zDDM_STATE_IDLE",
+                             "zDDM_STATE_WAITING",
+                             "zDDM_STATE_COUNTING"
+                           };
+
 #define USER_STATE_IDLE 0
 #define USER_STATE_WAITING 1
 #define USER_STATE_REQSTART 2
 #define USER_STATE_COUNTING 3
 
-
+const char* USER_STATE[] = { "USER_STATE_IDLE",
+                             "USER_STATE_WAITING",
+                             "USER_STATE_REQSTART",
+                             "USER_STATE_COUNTING"
+                           };
 
 #ifdef NODEBUG
 #define Debug(l,FMT,V) ;
@@ -174,7 +183,7 @@ static void deviceCallbackFunc(CALLBACK *pcb)
     process((struct dbCommon *)pscal);
     dbScanUnlock((struct dbCommon *)pscal);
 
-	func_out;
+    func_out;
 }
 
 
@@ -196,7 +205,7 @@ static void delayCallbackFunc(CALLBACK *pcb)
         (void)scanOnce((void *)pscal);
     }
 
-	func_out;
+    func_out;
 }
 
 static void autoCallbackFunc(CALLBACK *pcb)
@@ -208,13 +217,12 @@ static void autoCallbackFunc(CALLBACK *pcb)
     callbackGetUser(pscal, pcb);
     Debug(5, "scaler autoCallbackFunc: entry for '%s'\n", pscal->name);
     (void)scanOnce((void *)pscal);
-	func_out;
+    func_out;
 }
 
 
 static long cvt_dbaddr( struct dbAddr* paddr)
 {
-    func_in;
     int index;
     index=dbGetFieldIndex(paddr);
     zDDMRecord *pzDDM=(zDDMRecord *)paddr->precord;
@@ -442,7 +450,6 @@ static long cvt_dbaddr( struct dbAddr* paddr)
                       break;
                   }
     }
-	func_out;
     return(0);
 }
 
@@ -506,7 +513,7 @@ static long init_record(pscal,pass)
     /*float vl0, vl1, vh1, vl2, vh2;*/
     short *ivl0, *ivl1, *ivh1, *ivl2, *ivh2;
     char *tr1, *tr2, *tr3, *tr4, *chen, *tsen;
-    char filename[40];
+    //char filename[40];
     det_DSET *pdset = (det_DSET *)(pscal->dset);
     CALLBACK *pcallbacks, *pdelayCallback, *pautoCallback, *pdeviceCallback;
     struct rpvtStruct *prpvt;
@@ -514,6 +521,7 @@ static long init_record(pscal,pass)
     pscal->nelm=zDDM_NCHAN;
     pscal->nchips=zDDM_NCHIPS;
     nchips=zDDM_NCHIPS;        
+	trace2("pass %d, .PR1 = %ld", pass, (unsigned long)pscal->pr1);
     Debug(5, "scaler init_record: pass = %d\n", pass);
     Debug(5, "init_record: .PR1 = %ld\n", (unsigned long)pscal->pr1);
 
@@ -632,6 +640,8 @@ static long init_record(pscal,pass)
         }
         stuffit(pscal);
         stuff_DAC(pscal);
+
+		trace("exit for pass 0");
         func_out;
         return (0);
 
@@ -674,18 +684,21 @@ static long init_record(pscal,pass)
     if (!(pdset = (det_DSET *)(pscal->dset)))
     {
         recGblRecordError(S_dev_noDSET,(void *)pscal, "zDDM: init_record");
-		func_out;
+		trace("exit for something missing");
+        func_out;
         return(S_dev_noDSET);
     }
 
     Debug(2, "init_record: calling dset->init_record %d\n", 0);
     if (pdset->init_record)
     {
+	    trace("calling dset->init_record");
         status=(*pdset->init_record)(pscal, pdeviceCallback);
         Debug(3, "init_record: dset->init_record returns %li\n", status);
         if (status) {
             pscal->card = -1;
-		    func_out;
+			trace1("dset->init_record() failed with %li", status);
+            func_out;
             return (status);
         }
         pscal->card = pscal->inp.value.vmeio.card;
@@ -696,6 +709,7 @@ static long init_record(pscal,pass)
         pscal->freq = 4e6;
         db_post_events(pscal,&(pscal->freq),DBE_VALUE);
     }
+	trace1("pscal->freq = %f", pscal->freq);
 
     /* default count time */
     if ((pscal->tp == 0.0) && (pscal->pr1 == 0)) {
@@ -731,7 +745,7 @@ static long init_record(pscal,pass)
     db_post_events(pscal,&(pscal->ps2),DBE_VALUE);
     db_post_events(pscal,&(pscal->ps3),DBE_VALUE);
 
-	func_out;
+    func_out;
     return(0);
 }
 
@@ -747,12 +761,12 @@ static long process( zDDMRecord* pscal)
     struct rpvtStruct *prpvt = (struct rpvtStruct *)pscal->rpvt;
     CALLBACK *pcallbacks = prpvt->pcallbacks;
     det_DSET *pdset = (det_DSET *)(pscal->dset);
-    CALLBACK *pdelayCallback = (CALLBACK *)&(pcallbacks[0]); 
+    //CALLBACK *pdelayCallback = (CALLBACK *)&(pcallbacks[0]); 
     CALLBACK *pautoCallback = (CALLBACK *)&(pcallbacks[1]);
-    CALLBACK *pdeviceCallback = (CALLBACK *)&(pcallbacks[2]); 
+    //CALLBACK *pdeviceCallback = (CALLBACK *)&(pcallbacks[2]); 
 
     if(zDDMRecordDebug>2)
-	{
+    {
         printf("At process entry[%d]:\n",__LINE__);
         printf("User state = %d\n",pscal->us);
         printf("Scaler state = %d\n",pscal->ss);
@@ -765,17 +779,20 @@ static long process( zDDMRecord* pscal)
     pscal->udf = FALSE;
     prev_scaler_state = pscal->ss;
 
+    //--------------------------------------------------
+    // 1.
     /* If we're being called as a result of a done-counting interrupt, */
     /* (*pdset->done)(pscal) will return TRUE */
     if ((*pdset->done)(pscal))
-	{
-	    trace( "(*pdset->done)(pscal)\n" );
+    {
+        trace( "1. (*pdset->done)(pscal)\n" );
         pscal->ss = zDDM_STATE_IDLE;
 
         Debug(5, "done=1; zDDM_STATE_IDLE %i\n",pscal->ss);
 
         /* Auto-count cycle is not allowed to reset .CNT field. */
-        if (pscal->us == USER_STATE_COUNTING) {
+        if (pscal->us == USER_STATE_COUNTING)
+		{
             Debug(5, "Setting CNT to 0 %d\n",0);
             pscal->cnt = 0;
             db_post_events(pscal,&(pscal->cnt),DBE_VALUE);
@@ -788,27 +805,30 @@ static long process( zDDMRecord* pscal)
         }
     }
 
+    //--------------------------------------------------
+	// 2.
+
     if (pscal->cnt != pscal->pcnt)
-	{
-	    trace( "pscal->cnt != pscal->pcnt\n" );
+    {
+        trace( "2. pscal->cnt != pscal->pcnt\n" );
         handled = 0;
         if (pscal->cnt && ( (pscal->us == USER_STATE_REQSTART) ||
                             (pscal->us == USER_STATE_WAITING )   ) ) 
         {
-		    trace("USER_STATE_REQSTART or USER_STATE_WAITING");
+            trace("2.1 pscal-> us == USER_STATE_REQSTART or USER_STATE_WAITING");
             /*** if we're already counting (auto-count), stop ***/
             if (pscal->ss == zDDM_STATE_COUNTING)
-			{
-			    trace("zDDM_STATE_COUNTING. Killing count");
+            {
+                trace("2.1.1 pscal->ss == zDDM_STATE_COUNTING. Killing count");
                 Debug(5, "Killing count %d\n",0);
                 (*pdset->arm)(pscal, 0);
                 pscal->ss = zDDM_STATE_IDLE;
             }
 
             if (pscal->us == USER_STATE_REQSTART)
-			{
+            {
+                trace("2.1.2 pscal->us==USER_STATE_REQSTART. Start counting");
                 Debug(5, "process: USER_STATE_REQSTART. Start counting %d\n",0);
-				trace("USER_STATE_REQSTART. Start counting");
                 (*pdset->reset)(pscal);
                 pscal->pr1 = (unsigned long)(pscal->tp * pscal->freq);
                 (*pdset->write_preset)(pscal, pscal->pr1);
@@ -820,16 +840,17 @@ static long process( zDDMRecord* pscal)
                 justStartedUserCount = 1; 
                 Debug(5, "process: handled=%d\n",handled);
                 Debug(5, "process: justStartedUserCount=%d\n",justStartedUserCount);
+				trace2("pscal->tp = %f, pscal->freq=%f", pscal->tp, pscal->freq);
             }
         }
-		else
-		{
-		    trace("Not USER_STATE_REQSTART or USER_STATE_WAITING");
-		    if (!pscal->cnt)
-		    {
-		        trace( "!pscal->cnt\n" );
+        else
+        {
+            trace("2.2 pscal->ss != USER_STATE_REQSTART or USER_STATE_WAITING");
+            if (!pscal->cnt)
+            {
+                trace( "!pscal->cnt\n" );
                 if (pscal->ss != zDDM_STATE_IDLE)
-		    	    (*pdset->arm)(pscal, 0);
+                    (*pdset->arm)(pscal, 0);
                 pscal->ss = zDDM_STATE_IDLE;
                 pscal->us = USER_STATE_IDLE;
                 justFinishedUserCount = 1;
@@ -838,55 +859,60 @@ static long process( zDDMRecord* pscal)
                 Debug(5, "process: User state=%d\n",pscal->us);
                 Debug(5, "process: Scaler state=%d\n",pscal->ss);
             }
-		    else
-			    trace("pscal->cnt");
-		}
+            else
+                trace("pscal->cnt");
+        }
         
-		if (handled)
-		{
-		    trace ( "handled" );
+        if (handled)
+        {
+            trace ( "handled" );
             pscal->pcnt = pscal->cnt;
             Debug(5, "process:handled: pcnt=%d -> cnt\n",pscal->pcnt);
         }
     }
 
+    //--------------------------------------------------
+    // 3.
     /* read and display scalers */
     /*        updateCounts(pscal); */
 
     if (justStartedUserCount || justFinishedUserCount)
-	{
+    {
+	    trace("3. justStartedUserCount || justFinishedUserCount");
         /* fire .cout link to trigger anything that should coincide with scaler integration */
         status = dbPutLink( &pscal->cout, DBR_SHORT, &pscal->cnt, 1 );
         if (!RTN_SUCCESS(status))
-		{
+        {
             Debug(5, "scaler:process: ERROR %d PUTTING TO COUT LINK.\n", status);
         }
         
-		if (justFinishedUserCount)
-		{
+        if (justFinishedUserCount)
+        {
             /* fire .coutp link to trigger anything that should coincide with scaler integration */
             status = dbPutLink(&pscal->coutp, DBR_SHORT, &pscal->cnt, 1);
             if (!RTN_SUCCESS(status))
-			{
+            {
                 Debug(5, "scaler:process: ERROR %d PUTTING TO COUTP LINK.\n", status);
             }
         }
     }
 
+    //--------------------------------------------------
+    // 4.
     /* done counting? */
     if (pscal->ss == zDDM_STATE_IDLE)
-	{
-	    trace("zDDM_STATE_IDLE");
+    {
+        trace("4. pscal->ss == zDDM_STATE_IDLE");
         Debug(5, "Done counting? %d\n",0 );
         recGblGetTimeStamp( pscal );
         do_alarm(pscal);
         monitor(pscal);
         if ((pscal->pcnt==0) && (pscal->us == USER_STATE_IDLE))
-		{
-		    trace("pscal->pcnt==0 && USER_STATE_IDLE");
+        {
+            trace("4.1 pscal->pcnt==0 && USER_STATE_IDLE");
             if (prev_scaler_state == zDDM_STATE_COUNTING)
-			{
-			    trace("zDDM_STATE_COUNTING");
+            {
+                trace("4.1.1 zDDM_STATE_COUNTING");
                 zDDM_state.newdata = 1; /* tell device support that we acquired new data */
                 (*pdset->read)(pscal); /* read data */
                 db_post_events(pscal,pscal->bptr,DBE_VALUE);
@@ -894,24 +920,26 @@ static long process( zDDMRecord* pscal)
                 db_post_events(pscal,pscal->ps2,DBE_VALUE);
                 db_post_events(pscal,pscal->ps3,DBE_VALUE);
             }
-			else
-			    trace("Not zDDM_STATE_COUNTING");
+            else
+                trace("4.1.2 Not zDDM_STATE_COUNTING");
             recGblFwdLink(pscal);
         }
-		else
-		    trace("pscal->pcnt!=0 or not USER_STATE_IDLE");
+        else
+            trace("4.2 pscal->pcnt!=0 or not USER_STATE_IDLE");
     }
-	else
-	{
-	    trace("Not zDDM_STATE_IDLE");
-	}
+    else
+    {
+        trace("4.x pscal->ss != zDDM_STATE_IDLE");
+    }
 
+    //--------------------------------------------------
+    // 5.
     /* Are we in auto-count mode and not already counting? */
     if ( pscal->us == USER_STATE_IDLE &&
-	     pscal->cont                  &&
+         pscal->cont                  &&
          pscal->ss != zDDM_STATE_COUNTING )
-	{
-	    trace("auto-count mode and not already counting");
+    {
+        trace("5. (pscal->us==USER_STATE_IDLE) && (pscal->cont) && (pscal->ss != zDDM_STATE_COUNTING)");
 
         double dly_sec=pscal->dly1;  /* seconds to delay */
 
@@ -919,8 +947,8 @@ static long process( zDDMRecord* pscal)
         if (putNotifyOperation) dly_sec = MAX(pscal->dly1, zDDM_wait_time);
         /* if (we-have-to-wait && we-haven't-already-waited) { */
         if (dly_sec > 0 && pscal->ss != zDDM_STATE_WAITING)
-		{
-		    trace("scheduling autocount restart");
+        {
+            trace("5.1 scheduling autocount restart");
             Debug(5, "process: scheduling autocount restart: %d\n",0);
             /*
              * Schedule a callback, and make a note that counting should start
@@ -930,9 +958,9 @@ static long process( zDDMRecord* pscal)
             pscal->ss = zDDM_STATE_WAITING;  /* tell ourselves to start next time */
             callbackRequestDelayed(pautoCallback, dly_sec);
         }
-		else
-		{
-		    trace("restarting autocount");
+        else
+        {
+            trace("5.2 restarting autocount");
             Debug(5, "process: restarting autocount %d\n",0);
             /* Either the delay time is zero, or pscal->ss = zDDM_STATE_WAITING
              * (we've already waited), so start auto-count counting.
@@ -942,7 +970,7 @@ static long process( zDDMRecord* pscal)
              */
             (*pdset->reset)(pscal);
             if (pscal->tp1 >= 1.e-3)
-			{
+            {
                 (*pdset->write_preset)(pscal, (unsigned long)(pscal->tp1*pscal->freq));
             }
             (*pdset->arm)(pscal, 1);
@@ -1030,16 +1058,16 @@ static long special( struct dbAddr* paddr, int after )
             Debug(5, "special: CNT; User State =%d\n", pscal->us);
             printf( "special: CNT; User State =%d\n", pscal->us );
             if (pscal->cnt && (pscal->us != USER_STATE_IDLE))
-			{
-			    trace ( "pscal->cnt && (pscal->us != USER_STATE_IDLE)" );
-		        func_out;
-				return(0);
-		    }
+            {
+                trace ( "pscal->cnt && (pscal->us != USER_STATE_IDLE)" );
+                func_out;
+                return(0);
+            }
 
             /* fire .coutp link to trigger anything that should coincide with scaler integration */
             status = dbPutLink(&pscal->coutp, DBR_SHORT, &pscal->cnt, 1);
             if (!RTN_SUCCESS(status))
-			{
+            {
                 Debug(5, "scaler:special: ERROR %d PUTTING TO COUTP LINK.\n", status); 
                 printf( "scaler:special: ERROR %d PUTTING TO COUTP LINK.\n", status ); 
             }
@@ -1050,19 +1078,19 @@ static long special( struct dbAddr* paddr, int after )
             dly = pscal->dly;   /* seconds to delay */
             if (dly<0.0) dly = 0.0;
             if (dly == 0.0 || pscal->cnt == 0)
-			{
+            {
                 /*** handle request now ***/
                 if (pscal->cnt)
-				{
+                {
                     pscal->us = USER_STATE_REQSTART;
                     Debug(5, "special: start counting. User State= %d\n",pscal->us);
                     printf( "special: start counting. User State= %d\n",pscal->us);
                 }
-				else
-				{
+                else
+                {
                     /* abort any counting or request to start counting */
                     switch (pscal->us)
-					{
+                    {
                         case USER_STATE_WAITING:
                             /* We may have a watchdog timer going.  Cancel it. */
                             if (pdelayCallback->timer) epicsTimerCancel(pdelayCallback->timer);
@@ -1076,19 +1104,19 @@ static long special( struct dbAddr* paddr, int after )
                     }
                 }
                 if (pscal->scan)
-				{
-				    trace( "scanOnce" );
-					scanOnce((void *)pscal);
-			    }
-				else
-				{
-				    trace( "No scan" );
-		        }
+                {
+                    trace( "scanOnce" );
+                    scanOnce((void *)pscal);
+                }
+                else
+                {
+                    trace( "No scan" );
+                }
             }
             else
-			{
+            {
                 /* schedule callback to handle request */
-				trace( "schedule callback\n");
+                trace( "schedule callback\n");
                 pscal->us = USER_STATE_WAITING;
                 callbackRequestDelayed(pdelayCallback, pscal->dly);
             }
@@ -1098,15 +1126,16 @@ static long special( struct dbAddr* paddr, int after )
             /* Scan record if it's not Passive.  (If it's Passive, it'll get */
             /* scanned automatically, since .cont is a Process-Passive field.) */
             if (pscal->scan)
-			{
-			    trace( "scanOnce" );
-    			scanOnce((void *)pscal);
-			}
+            {
+                trace( "scanOnce" );
+                scanOnce((void *)pscal);
+            }
             break;
 
         case zDDMRecordTP:
             /* convert time to clock ticks */
             pscal->pr1 = (unsigned long) (pscal->tp * pscal->freq);
+			trace1("pr1 = %d", pscal->pr1);
             db_post_events(pscal,&(pscal->pr1),DBE_VALUE);
             break;
 
@@ -1265,18 +1294,18 @@ static long special( struct dbAddr* paddr, int after )
             break;
     } /* switch (fieldIndex) */
     
-	if(modified)
-	{
+    if(modified)
+    {
         Debug(2, "special: Hermes controls modified: modifed=%i\n", modified);
         stuffit(pscal);
     }
     
-	if(DAC_modified){
+    if(DAC_modified){
         Debug(2, "special: DAC controls modified: modifed=%i\n", DAC_modified);
         stuff_DAC(pscal);
     }
     
-	func_out;
+    func_out;
     return(0);
 }
 

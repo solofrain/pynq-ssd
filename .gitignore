@@ -13,3 +13,5 @@ info_positions.*
 *.dat
 *.bin
 *.o
+.iocsh_history
+zddm.dbd

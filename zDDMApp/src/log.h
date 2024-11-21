@@ -16,6 +16,9 @@
 #define TRACE
 #ifdef TRACE
 #define trace(a)  do{char s[100]; snprintf(s, sizeof(s), "%s: %s\n", __func__, a); printf("%s", s); fflush(stdout);}while(0)
+#define trace1(a, b)  do{printf("%s: ", __func__); printf( a, b); printf("\n"); fflush(stdout);}while(0)
+#define trace2(a, b, c)  do{printf("%s: ", __func__); printf( a, b, c); printf("\n"); fflush(stdout);}while(0)
+#define trace3(a, b, c, d)  do{printf("%s: ", __func__); printf( a, b, c, d); printf("\n"); fflush(stdout);}while(0)
 #define func_in   trace("----------------- enter -----------------")
 #define func_out  trace("----------------- exit -----------------")
 #else

@@ -173,8 +173,12 @@ unsigned int  dacs[5];
  ***************************************************/
 STATIC long zDDM_report(int level)
 {
-    if (zDDM_state.card_exists) {
-        printf("  NSLS Multi-element Silicon Detector #%d\n: No. elements= %d\n",0,zDDM_state.num_channels);
+    if (zDDM_state.card_exists)
+    {
+        printf( "NSLS Multi-element Silicon Detector #%d\n: No. elements= %d\n",
+                0,
+                zDDM_state.num_channels
+              );
     }
     return (0);
 }
@@ -371,7 +375,7 @@ void token_step(void)
     
     //small delay, to debug with scope
     for (i=0;i<100;i++);
-	func_out;
+    func_out;
 }
 
 
@@ -561,14 +565,26 @@ STATIC long timeout( struct zDDMRecord *psr )
     {
         trig = fpgabase[TRIG];
         //      Debug(3,"Trig = %d\n\r",trig);
+		trace2("prevtrig = %d, trig = %d", prevtrig, trig);
         if( (prevtrig==1) && (trig==0) )
         {
+            trace("frame done");
             Debug0(3,"Frame done!\n");
             frame_done(1);
             /*       prevtrig=trig;*/
             epicsThreadSleep(0.001);
         }
+        else
+        {
+            trace("frame active");
+            trace3("frame trig = %d, frame length = %d, frame count = %d",
+			       fpgabase[TRIG],
+			       fpgabase[PR1],
+				   fpgabase[CNTR]
+				  );
+        }
         prevtrig = trig;
+        epicsThreadSleep(1);
     }     
 }
 
@@ -644,6 +660,8 @@ STATIC long zDDM_init_record(struct zDDMRecord *psr, CALLBACK *pcallback)
             recGblRecordError( S_dev_badBus,
                                (void *)psr,
                                "devzDDM (init_record) Illegal OUT Bus Type" );
+		trace("devzDDM (init_record) Illegal OUT Bus Type");
+		func_out;
         return( S_dev_badBus );
     }
 
@@ -653,6 +671,7 @@ STATIC long zDDM_init_record(struct zDDMRecord *psr, CALLBACK *pcallback)
         recGblRecordError( S_dev_badCard,
                            (void *)psr,
                            "devzDDM (init_record) card does not exist!" );
+        trace("devzDDM (init_record) card does not exist!" );
         func_out;
         return( S_dev_badCard );
     }
@@ -662,6 +681,7 @@ STATIC long zDDM_init_record(struct zDDMRecord *psr, CALLBACK *pcallback)
         recGblRecordError( S_dev_badSignal,
                            (void *)psr,
                            "devzDDM (init_record) card already in use!" );
+        trace("devzDDM (init_record) card already in use!" );
         func_out;
         return( S_dev_badSignal );
     }
@@ -677,6 +697,7 @@ STATIC long zDDM_init_record(struct zDDMRecord *psr, CALLBACK *pcallback)
     {
         recGblRecordError(S_dev_badSignal,(void *)psr,
                 "devzDDM: Wrong number of channels!");        
+        trace("devzDDM: Wrong number of channels!");        
         func_out;
         return(S_dev_badSignal);
     }
@@ -713,7 +734,9 @@ STATIC long zDDM_init_record(struct zDDMRecord *psr, CALLBACK *pcallback)
                        (EPICSTHREADFUNC)timeout,
                        psr
                      );
-    func_out;
+    
+	func_out;
+	return(0);
 }
 
 
@@ -724,7 +747,7 @@ STATIC long zDDM_arm(void *psscal, int val)
     Debug(2, "scaler_arm(): entry, val = %d\n\r", val); 
 
     fpgabase[TRIG] = val;
-
+    trace1("set [TRIG] to %d", fpgabase[TRIG]);
     func_out;
     return(0);
 }
@@ -794,10 +817,14 @@ int wrap(void *pscal)
     int bits;
     char tr1, tr2, tr3, tr4, *chen, *tsen;
 
-    tr1  = pdet->ptr1;
-    tr2  = pdet->ptr2;
-    tr3  = pdet->ptr3;
-    tr4  = pdet->ptr4;
+    //tr1  = pdet->ptr1;
+    //tr2  = pdet->ptr2;
+    //tr3  = pdet->ptr3;
+    //tr4  = pdet->ptr4;
+    tr1  = *(char*)pdet->ptr1;
+    tr2  = *(char*)pdet->ptr2;
+    tr3  = *(char*)pdet->ptr3;
+    tr4  = *(char*)pdet->ptr4;
     chen = pdet->pchen;
     tsen = pdet->ptsen;
 
@@ -1015,15 +1042,20 @@ STATIC long zDDM_read(void *pscal)
 
 STATIC long zDDM_done(zDDMRecord *psr)
 {
+    func_in;
+
     devPVT *pPvt = (devPVT *)psr->dpvt;
     Debug(2, "scaler_done(): entry, pPvt->done = %d\n\r", pPvt->done);
     if ( pPvt->done )
     {
         pPvt->done = 0;
+        trace("done");
+        func_out;
         return(1);
     }
     else
     {
+        func_out;
         return(0);
     }
 }

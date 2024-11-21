@@ -13,7 +13,7 @@
 #define PR1           53
 #define COUNT_MODE    55
 #define FRAME_NO      54
-
+#define CNTR          55
 
 
 
