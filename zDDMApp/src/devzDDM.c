@@ -565,7 +565,7 @@ STATIC long timeout( struct zDDMRecord *psr )
     {
         trig = fpgabase[TRIG];
         //      Debug(3,"Trig = %d\n\r",trig);
-		trace2("prevtrig = %d, trig = %d", prevtrig, trig);
+		//trace2("prevtrig = %d, trig = %d", prevtrig, trig);
         if( (prevtrig==1) && (trig==0) )
         {
             trace("frame done");
@@ -576,15 +576,14 @@ STATIC long timeout( struct zDDMRecord *psr )
         }
         else
         {
-            trace("frame active");
-            trace3("frame trig = %d, frame length = %d, frame count = %d",
+            /*trace3("frame trig = %d, frame length = %d, frame count = %d",
 			       fpgabase[TRIG],
 			       fpgabase[PR1],
 				   fpgabase[CNTR]
-				  );
+				  );*/
         }
         prevtrig = trig;
-        epicsThreadSleep(1);
+        //epicsThreadSleep(1);
     }     
 }
 
