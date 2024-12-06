@@ -17,6 +17,7 @@ DBDINC += zDDMRecord
 
 # The following are compiled and added to the Support library
 zDDMSupport_SRCS += pl_lib.c
+zDDMSupport_SRCS += pl_reg.c
 zDDMSupport_SRCS += devI2C_sep.c
 #zDDMSupport_SRCS += devSPIdac.c
 #zDDMSupport_SRCS += devMaiaSPIADC.c
@@ -63,6 +64,10 @@ zDDM_LIBS += $(EPICS_BASE_IOC_LIBS)
 #sncExample_LIBS += $(EPICS_BASE_HOST_LIBS)
 
 #===========================
+
+#USR_INCLUDES += -I/usr/include/c++/11
+#USR_CXXFLAGS += -std=c++11
+
 
 include $(TOP)/configure/RULES
 #----------------------------------------

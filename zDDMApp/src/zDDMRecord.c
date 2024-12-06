@@ -50,12 +50,12 @@ extern epicsTimerQueueId  zDDMWdTimerQ;
 #include  <callback.h>
 #include  <dbDefs.h>
 #include  <dbAccess.h>
-#include    <dbScan.h>
-#include    <dbEvent.h>
+#include  <dbScan.h>
+#include  <dbEvent.h>
 #include  <dbFldTypes.h>
 #include  <errMdef.h>
 #include  <recSup.h>
-#include    <recGbl.h>
+#include  <recGbl.h>
 #include  <devSup.h>
 #include  <special.h>
 #include  <iocsh.h>
@@ -64,8 +64,8 @@ extern epicsTimerQueueId  zDDMWdTimerQ;
 #include  "zDDMRecord.h"
 #undef GEN_SIZE_OFFSET
 #include  "devzDDM.h"
-#include    "pl_reg.h"
-#include    "log.h"
+#include  "pl_reg.h"
+#include  "log.h"
 
 #define zDDM_STATE_IDLE 0
 #define zDDM_STATE_WAITING 1
@@ -112,7 +112,7 @@ volatile int zDDM_NCHIPS;
 //volatile unsigned long tdc[MAX_CHANNELS][1024];
 //volatile unsigned long spect[4096];
 
-extern unsigned int *fpgabase;  /* mmap'd fpga registers */
+//extern unsigned int *fpgabase;  /* mmap'd fpga registers */
 
 extern det_state zDDM_state;
 extern int stuffit();
@@ -985,7 +985,7 @@ static long process( zDDMRecord* pscal)
     }
 
     pscal->pact = FALSE;
-    pscal->runno=fpgabase[FRAME_NO];
+    pscal->runno = fpga_read(FRAME_NO);
     db_post_events(pscal,&(pscal->runno),DBE_VALUE);
 
     Debug(5, "process:Mutex unlocked\nScaler state=%d\n",pscal->ss);
@@ -1019,7 +1019,6 @@ static long special( struct dbAddr* paddr, int after )
     CALLBACK *pdelayCallback = (CALLBACK *)&(pcallbacks[0]);
     int fieldIndex = dbGetFieldIndex(paddr);
     double dly=0.0;
-    extern unsigned int *fpgabase;
     float *vl0a, *vl0b, *vl1a, *vl1b, *vh1a, *vh1b;
     float *vl2a, *vl2b, *vh2a, *vh2b;
     short *ivl0, *ivl1, *ivh1, *ivl2, *ivh2;
@@ -1147,7 +1146,7 @@ static long special( struct dbAddr* paddr, int after )
 
         case zDDMRecordRUNNO:
             /* Get frame number */
-            fpgabase[FRAME_NO]=pscal->runno;
+            fpga_write(FRAME_NO, pscal->runno);
             Debug(2, "special: RUNNO %i\n", pscal->runno);
             db_post_events(pscal,&(pscal->runno),DBE_VALUE);
             break;

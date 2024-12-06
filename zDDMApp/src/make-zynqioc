@@ -1,11 +1,18 @@
 #!/bin/bash
 
-FILES=("/epics/iocs/new_hermes_IOC/zDDMApp/src/devzDDM.c" "/epics/iocs/new_hermes_IOC/zDDMApp/src/zDDMRecord.c" "/epics/iocs/new_hermes_IOC/zDDMApp/src/log.h")
+FILES=(
+    "/epics/iocs/new_hermes_IOC/zDDMApp/src/devzDDM.c"
+    "/epics/iocs/new_hermes_IOC/zDDMApp/src/zDDMRecord.c"
+    "/epics/iocs/new_hermes_IOC/zDDMApp/src/pl_reg.h"
+    "/epics/iocs/new_hermes_IOC/zDDMApp/src/pl_reg.c"
+    "/epics/iocs/new_hermes_IOC/zDDMApp/src/log.h"
+    "/epics/iocs/new_hermes_IOC/zDDMApp/src/Makefile"
+	)
 
 while true; do
     inotifywait -e modify "${FILES[@]}"
 
-    make
+    clear; make
 
     build_date=$(date)
     echo "Last built $build_date"

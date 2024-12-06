@@ -122,8 +122,8 @@ extern int zDDM_NCHIPS;
 
 
 
-volatile unsigned int *fpgabase;  /* mmap'd fpga registers */
-int fd, fe; /* file descriptor for memory map device and IRQ service*/
+//volatile unsigned int *fpgabase;  /* mmap'd fpga registers */
+//int fd, fe; /* file descriptor for memory map device and IRQ service*/
 
 /*extern*/ epicsMutexId SPI_lock;
 
@@ -208,7 +208,7 @@ STATIC int zDDM_shutdown()
  ******************************************/
 void set_sdi()
 {
-    fpgabase[SPIREG] = 1;
+    fpga_write(SPIREG, 1);
 }
 
 /*****************************************
@@ -219,7 +219,7 @@ void set_sdi()
  ******************************************/
 void clear_sdi()
 {
-    fpgabase[SPIREG] = 0;
+    fpga_write(SPIREG, 0);
 }
 
 
@@ -233,7 +233,7 @@ void clear_sdi()
 void set_token()
 {
     Debug0(3,"Set TOKENREG\n");
-    fpgabase[TOKENREG] = 1;
+    fpga_write(TOKENREG, 1);
 }
 
 /*****************************************
@@ -245,7 +245,7 @@ void set_token()
 void clear_token()
 {
     Debug0(3,"Clear TOKENREG\n");
-    fpgabase[TOKENREG] = 0;
+    fpga_write(TOKENREG, 0);
 }
 
 /*****************************************
@@ -262,16 +262,16 @@ void clock_token()
     Debug0(3,"Clock TOKENREG\n");
 
     //read current value of token
-    tda = fpgabase[TOKENREG] & 0x1;
+    tda = fpga_read(TOKENREG) & 0x1;
     
     //set tck high 
-    fpgabase[TOKENREG] = 0x2 | tda;
+    fpga_write(TOKENREG, 0x2 | tda);
     
     //small delay, to debug with scope
     for (i=0; i<100; i++);
     
     //set tck low
-    fpgabase[TOKENREG] = 0x0 | tda; 
+    fpga_write(TOKENREG, 0x0 | tda);
     
     //small delay, to debug with scope
     for (i=0; i<100; i++);
@@ -295,13 +295,13 @@ void send_spi_bit(int val)
     //printf("%d ",(val & 0x1));
 
     //set data with clock high
-    fpgabase[SPIREG] = sda | 0x2;
+    fpga_write(SPIREG, sda | 0x2);
 
     //set clk low 
-    fpgabase[SPIREG] =  (~0x2) & sda;
+    fpga_write(SPIREG,  (~0x2) & sda);
 
     //set clk high
-    fpgabase[SPIREG] =  sda | 0x2;
+    fpga_write(SPIREG,  sda | 0x2);
 }
 
 /*****************************************
@@ -320,13 +320,13 @@ int get_spi_bit()
     int bit;
     
     //set sclk low 
-    fpgabase[SPIREG] = 0;
+    fpga_write(SPIREG, 0);
     
     //get data with clock low
-    bit = (fpgabase[SPIOUT] & 0x1);
+    bit = (fpga_read(SPIOUT) & 0x1);
     
     //set clk high 
-    fpgabase[SPIREG] =  0x2;
+    fpga_write(SPIREG,  0x2);
     
     return(bit);
 }
@@ -362,16 +362,16 @@ void token_step(void)
     Debug0(3,"Token step\n");
     
     //read current value of token
-    tda = fpgabase[TOKENREG] & 0x1;
+    tda = fpga_read(TOKENREG) & 0x1;
     
     //set tck high 
-    fpgabase[TOKENREG] = 0x2 | tda;
+    fpga_write(TOKENREG, 0x2 | tda);
     
     //small delay, to debug with scope
     for (i=0;i<100;i++);
     
     //set tck low
-    fpgabase[TOKENREG] = 0x0 | tda; 
+    fpga_write(TOKENREG, 0x0 | tda); 
     
     //small delay, to debug with scope
     for (i=0;i<100;i++);
@@ -381,41 +381,41 @@ void token_step(void)
 
 void setread(void)
 {
-    fpgabase[BITS] = fpgabase[BITS]&(~0x2);
+    fpga_write(BITS, fpga_read(BITS)&(~0x2));
 }
 
 void setwrite(void)
 {
-    fpgabase[BITS] = fpgabase[BITS]|0x2;
+    fpga_write(BITS, fpga_read(BITS)|0x2);
 }
 
 
 void setdevice(void)
 {
-    fpgabase[TOKENREG] = fpgabase[TOKENREG]|0x1;
+    fpga_write(TOKENREG, fpga_read(TOKENREG)|0x1);
 }
 
 void cleardevice(void)
 {
-    fpgabase[TOKENREG] = fpgabase[TOKENREG]&(~0x1);
+    fpga_write(TOKENREG, fpga_read(TOKENREG)&(~0x1));
 }
 
 
 int get_SDAC()
 {
-    return((fpgabase[BITS]&0x4)>>2);
+    return((fpga_read(BITS)&0x4)>>2);
 }
 
 void set_SDAC(int i)
 {
     int sdac;
 
-    sdac = fpgabase[BITS];
+    sdac = fpga_read(BITS);
 
     if(i)
-        fpgabase[BITS] = sdac | 0x4;
+        fpga_write(BITS, sdac | 0x4);
     else
-        fpgabase[BITS] = sdac & (~0x4);
+        fpga_write(BITS, sdac & (~0x4));
 }
 
 void enable_ASIC_spi(void)
@@ -442,7 +442,9 @@ int stuffit( void *pscal )
     FASTLOCK( &(SPI_lock) );
 
     SDAC=get_SDAC();
+
     set_SDAC(0);
+
     Debug(3,"stuffit_entry: SDAC=%i\n",SDAC);
     setwrite();
     set_token(); /* set chip-select for first chip */
@@ -563,7 +565,7 @@ STATIC long timeout( struct zDDMRecord *psr )
     Debug0(3,"Thread running\n");
     while(1)
     {
-        trig = fpgabase[TRIG];
+        trig = fpga_read(TRIG);
         //      Debug(3,"Trig = %d\n\r",trig);
 		//trace2("prevtrig = %d, trig = %d", prevtrig, trig);
         if( (prevtrig==1) && (trig==0) )
@@ -577,9 +579,9 @@ STATIC long timeout( struct zDDMRecord *psr )
         else
         {
             /*trace3("frame trig = %d, frame length = %d, frame count = %d",
-			       fpgabase[TRIG],
-			       fpgabase[PR1],
-				   fpgabase[CNTR]
+			       fpga_write(TRIG],
+			       fpga_write(PR1],
+				   fpga_read(CNTR)
 				  );*/
         }
         prevtrig = trig;
@@ -613,25 +615,26 @@ STATIC long zDDM_init(int after)
 
     Debug0(3,"zDDMWdTimerQ created\n\r");
 
-    fd = open("/dev/mem",O_RDWR|O_SYNC);
-    if (fd < 0)
-    {
-        printf( "Can't open /dev/mem\n" );
-        exit(1);
-    }
-
-    fpgabase = (unsigned int *) mmap( 0,
-                                      255,
-                                      PROT_READ|PROT_WRITE,MAP_SHARED,
-                                      fd,
-                                      0x43C00000
-                                    );
-
-    if ( fpgabase == NULL )
-    {
-        printf("Can't map FPGA space\n");
-        exit(1);
-    }
+    fpga_init( 0x43C00000, 255 );
+//    fd = open("/dev/mem",O_RDWR|O_SYNC);
+//    if (fd < 0)
+//    {
+//        printf( "Can't open /dev/mem\n" );
+//        exit(1);
+//    }
+//
+//    fpgabase = (unsigned int *) mmap( 0,
+//                                      255,
+//                                      PROT_READ|PROT_WRITE,MAP_SHARED,
+//                                      fd,
+//                                      0x43C00000
+//                                    );
+//
+//    if ( fpgabase == NULL )
+//    {
+//        printf("Can't map FPGA space\n");
+//        exit(1);
+//    }
 
     Debug(3,"zDDM_init: zDDM %i initialized\n\r",0);
     func_out;
@@ -745,8 +748,8 @@ STATIC long zDDM_arm(void *psscal, int val)
     func_in;
     Debug(2, "scaler_arm(): entry, val = %d\n\r", val); 
 
-    fpgabase[TRIG] = val;
-    trace1("set [TRIG] to %d", fpgabase[TRIG]);
+    fpga_write(TRIG, val);
+    trace1("set [TRIG] to %d", fpga_read(TRIG));
     func_out;
     return(0);
 }
@@ -755,7 +758,7 @@ STATIC long zDDM_arm(void *psscal, int val)
 STATIC long zDDM_reset(void)
 {
     Debug(2, "scaler_reset(): entry %d\n\r", 1);
-    fpgabase[TRIG] = 0;
+    fpga_write(TRIG, 0);
     return(0);
 }
 
@@ -766,7 +769,7 @@ STATIC long zDDM_write_preset( zDDMRecord *psr, int val )
     Debug(2, "scaler_write_preset(): entry, after = %d\n\r", 1); 
     zDDMRecord *pdet = (zDDMRecord *)psr;
     pdet->pr1 = val;
-    fpgabase[PR1] = pdet->pr1;
+    fpga_write(PR1, pdet->pr1);
     func_out;
     return(0);
 }
@@ -970,7 +973,7 @@ int getcounts(void *pscal)
     index = 0;
     for ( chip=0; chip<zDDM_NCHIPS; chip++ )
     {
-        bit = ( fpgabase[SPIOUT] & 0x1 ) << 24; /* get MSB of first counter in chip */
+        bit = ( fpga_read(SPIOUT) & 0x1 ) << 24; /* get MSB of first counter in chip */
         for( i=31; i>=0; i-- )
         {
             s1[index] = bit | read_spi(23);
@@ -1112,7 +1115,7 @@ void registerpstate(void){
 epicsExportRegistrar(registerpstate);
 
 int peek(int reg){
-    printf("Register %i = %i\n",reg, fpgabase[reg]);
+    printf("Register %i = %i\n",reg, fpga_read(reg));
     return(0);
 }
 
@@ -1133,7 +1136,7 @@ epicsExportRegistrar(registerpeek);
 
 
 void poke(int reg, int val){
-    fpgabase[reg]=val;
+    fpga_write(reg, val);
     peek(reg);
 }
 
